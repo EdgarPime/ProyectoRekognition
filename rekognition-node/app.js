@@ -43,7 +43,7 @@ app.get('/:nombre', function (req, res) {
   let image = {
     Image: {
        S3Object: {
-       Bucket: "almacenimagenes", 
+       Bucket: "bucketproyecto", 
        Name: llave
       }
      },
