@@ -4,42 +4,27 @@ const fs = require('fs');
 const express = require("express");
 const app = express();
 //var rekognition = new AWS.Rekognition({apiVersion: '2016-06-27'});
-var s3 = new AWS.S3({apiVersion: '2006-03-01'});
+var s3 = new AWS.S3();
 
 //Creación y configuración de instancia de AWS Rekognition
 const rekognition = new AWS.Rekognition({
   accessKeyId: process.env.AWS_ACCESS_KEY,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION,
+  region: 'us-east-2',
   apiVersion: '2016-06-27'
 });
 
-
-
-//var urlParams = {Bucket: 'almacenimagenes', Key: 'test.jpg'};
-//s3Bucket.getSignedUrl('getObject', urlParams, function(err, url){
-//  console.log('the url of the image is', url);
-//})
-
-
-//Lee la imagen, la convierte a Buffer y prepara el objeto
-//const file_name = params.key;
-//const bitmap = 'https://almacenimagenes.s3.us-east-2.amazonaws.com/test.jpg' // fs.readFileSync(`almacenimagenes.s3.us-east-2.amazonaws.com/${file_name}`);
-//let image = {
- // Image: {
-  //  Bytes: new Buffer(bitmap)
-  //},
-  //Attributes: ['ALL']
-//}
 app.listen(8000, () => {
   console.log("El servidor está inicializado en el puerto 8000");
  });
 
 
-
-
 app.get('/:nombre', function (req, res) {
+  if (req.url != '/favicon.ico'){
   var llave = req.params.nombre;
+ /* if (llave= 'favicon.ico') {
+      llave = '';
+    }*/
   let image = {
     Image: {
        S3Object: {
@@ -53,9 +38,11 @@ app.get('/:nombre', function (req, res) {
     if (error) {
       throw new Error(error);
     }
+	let emotionName = '';
+	let maxConfidence;
     data.FaceDetails.forEach((response) => {
-      let maxConfidence = response.Emotions.reduce((a, b) => b.Confidence > a.Confidence ? b : a);
-      let emotionName = '';
+      maxConfidence = response.Emotions.reduce((a, b) => b.Confidence > a.Confidence ? b : a);
+      
       switch (maxConfidence.Type) {
         case 'HAPPY':
           emotionName = 'ALEGRÍA';
@@ -93,13 +80,13 @@ app.get('/:nombre', function (req, res) {
           emotionName = 'DESCONOCIDA';
         break;
       }
-      res.send(` ${emotionName} , ${maxConfidence.Confidence}`);
+      
     });
- 
-	
+ res.send(` ${emotionName} , ${maxConfidence.Confidence}`);
+  
 
 });
+}
 //Llama al método detectFaces
 
 });
-//correlo
